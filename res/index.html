@@ -1,0 +1,164 @@
+<html>
+
+<head>
+    <title>Hello</title>
+    <meta charset="UTF-8">
+    <style>
+        html {
+            background: gold;
+        }
+
+        div {
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        span {
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* body {
+        vertical-align:middle;
+        text-align:center;
+      } */
+    </style>
+    <script>
+        function consoleLog(s) {
+            console.log("from backend", s);
+        }
+
+        var timerId = -1;
+        var failedSum = 0;
+        document.ready = function () {
+            // calling native method defined in main.cpp
+            const thisWindow = Window.this;
+            const titleDiv = document.$("#Title");
+            console.log(thisWindow.MainFrame?.nativeMessage() ?? "ohoho");
+
+            const lastTimeEle = document.$("#lastTime");
+
+            const playerIdEle = document.$("#playerId");
+            const troopTypeEle = document.$('#troopType');
+            const ladderNotAllowedEle = document.$('#ladderNotAllowed');
+            const keepMoraleEle = document.$('#keepMorale');
+            const keepRationEle = document.$('#keepRation');
+            const troopsNumberEle = document.$('#troopsNumber');
+
+            const btn = document.$("#start");
+            btn.onclick = (ev) => {
+                console.log("woqu");
+                if (timerId < 0) {
+                    // start
+                    if (thisWindow.MainFrame?.initializeTrainer()) {
+                        console.log("init success");
+                    } else {
+                        console.log("GG!");
+                        return;
+                    }
+
+                    timerId = setInterval(() => {
+                        // console.log("running...: ", new Date());
+                        lastTimeEle.innerText = new Date();
+                        // get all input
+                        const troopType = troopTypeEle.value;
+                        const ladderNotAllowed = ladderNotAllowedEle.value ?? false;
+                        const keepMorale = keepMoraleEle.value ?? false;
+                        const keepRation = keepRationEle.value ?? false;
+                        const troopsNumber = troopsNumberEle.value ?? 0;
+                        
+                        // console.log(troopType, typeof troopType, ladderNotAllowed, keepMorale, keepRation, troopsNumber);
+
+                        // call backend functions
+                        const ret = thisWindow.MainFrame?.enhancePlayer(parseInt(troopType), ladderNotAllowed, keepRation, keepMorale, troopsNumber);
+                        if (!ret) {
+                            failedSum += 1;
+                        }
+
+                        // exit on error
+                        if (failedSum > 3) {
+                            clearInterval(timerId);
+                            timerId = -1;
+                            btn.innerText = "启动！";
+                            console.log("exiting due to too much errors.");
+                            return;
+                        }
+
+                        // display player id
+                        const playerId = thisWindow.MainFrame?.getPlayerIndex();
+                        if (playerId <= 0) {
+                            console.log("failed to get player id");
+                            return;
+                        }
+                        playerIdEle.innerText = playerId;
+                    }, 1000);
+                    btn.innerText = "停止！";
+                } else {
+                    // stop
+                    clearInterval(timerId);
+                    timerId = -1;
+                    btn.innerText = "启动！";
+                }
+            };
+        }
+    </script>
+</head>
+
+<body>
+    <div id="Title"></div>
+    </br>
+    <div>
+        <div id="playerId">请点击启动</div>
+    </div>
+    </br>
+    <div>
+        <span >最后运行于：</span>
+        <span id="lastTime"></span>
+    </div>
+    </br>
+    <div>
+        <select name="troopType" id="troopType">
+            <option value="9">弓騎兵【弓兵LV3】機動性高、兵擊威力上昇</option>
+            <option value="10">青州兵【槍兵LV3】兵擊時恢復士氣</option>
+            <option value="11">虎豹騎【騎兵LV3】兵擊時降低敵方士氣</option>
+            <option value="12">東州兵【槍兵LV2】兵擊威力上昇</option>
+            <option value="13">西涼兵【騎兵LV2】兵擊威力上昇</option>
+            <option value="14">藤甲兵【槍兵LV2】防禦最高、對火計較弱</option>
+            <option value="15">賊槍兵【槍兵LV1】破壞力高、對騎兵兵擊</option>
+            <option value="16">賊騎兵【騎兵LV1】機動性高、對弓兵兵擊</option>
+            <option value="17">賊弓兵【弓兵LV1】可以射擊、對槍兵兵擊</option>
+            <option value="29">南蠻兵【槍兵LV2】攻擊力高、防禦力低</option>
+            <option value="30">大象兵【騎兵LV3】機動性低但攻擊力與破壞力高</option>
+            <option value="31">烏丸兵【弓兵LV3】機動性高、兵擊時恢復士氣</option>
+            <option value="32">匈奴兵【弓兵LV3】機動性高、兵擊時降低敵方士氣</option>
+            <option value="33">山越兵【槍兵LV2】兵擊時降低敵方士氣</option>
+            <option value="34">氐羌兵【騎兵LV2】防禦力高、兵擊時恢復士氣</option>
+        </select>
+    </div>
+    </br>
+    <div>
+        <span>不允许使用云梯：</span>
+        <input type="checkbox" id="ladderNotAllowed" name="ladderNotAllowed" />
+    </div>
+    <br>
+    <div>
+        <span>保持最高士气：</span>
+        <input type="checkbox" id="keepMorale" name="keepMorale" />
+    </div>
+    <br>
+    <div>
+        <span>保持充足军粮：</span>
+        <input type="checkbox" id="keepRation" name="keepRation" />
+    </div>
+
+    <div>
+        <span>锁定部队人数：</span>
+        <input type="number" id="troopsNumber" name="troopsNumber" />
+    </div>
+
+    <div>
+        <button id="start">启动！</button>
+    </div>
+</body>
+
+</html>
