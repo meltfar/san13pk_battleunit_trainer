@@ -30,7 +30,7 @@ public:
 	sciter::string  nativeMessage() { return WSTR("Hello C++ World"); }
 
 	bool initializeTrainer() {
-		return gameEngine.searchAndOpen(L"San13PK_tc.exe");
+		return gameEngine.searchAndOpen(L"San13PK_sc.exe");
 	}
 
 	int getPlayerIndex() {
@@ -38,9 +38,9 @@ public:
 	}
 
 	// function to call engine.enhancePlayerWith
-	bool enhancePlayer(int troopType, bool ladderNotAllowed, bool keepRation, bool keepMorale, int troopsNumber) {
+	bool enhancePlayer(int troopType, bool ladderNotAllowed, bool keepRation, bool keepMorale, int troopsNumber, bool noInjuries) {
 		// this->call_function("consoleLog", troopType);
-		return gameEngine.enhancePlayerWith(static_cast<byte>(troopType), !ladderNotAllowed, keepRation, keepMorale, troopsNumber);
+		return gameEngine.enhancePlayerWith(static_cast<byte>(troopType), !ladderNotAllowed, keepRation, keepMorale, troopsNumber, noInjuries);
 	}
 protected:
 	Engine gameEngine;

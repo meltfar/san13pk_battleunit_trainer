@@ -197,7 +197,7 @@ public:
 	}
 
 	// 最外层的函数，做所有的事情
-	bool enhancePlayerWith(const byte unitType, const bool ladderAllowed, const bool keepRationFull, const bool keepMorale, const DWORD keepTroops) {
+	bool enhancePlayerWith(const byte unitType, const bool ladderAllowed, const bool keepRationFull, const bool keepMorale, const DWORD keepTroops, const bool noInjuries) {
 		bool playerFound = false;
 		try {
 			// update all information
@@ -246,15 +246,20 @@ public:
 						bu.troopCount += bu.injuredCount;
 					}
 					bu.injuredCount = 0;
-				} else if (!ladderAllowed) {
+				} else {
 					// not player, but ladder is not allowed
-					if (bu.weaponType == 18) {
+					if (!ladderAllowed && bu.weaponType == 18) {
 						bu.weaponType = 20; // 18 - Ladder, 20 - jinglan
+					}
+					
+					if (noInjuries) {
+						bu.injuredCount = 0;
 					}
 				}
 			}
 
-			if (!playerFound && ladderAllowed) {
+			// we've over with it if no player found, no ladder modification and injuries elimitation needed.
+			if (!playerFound && ladderAllowed && !noInjuries) {
 				return true;
 			}
 

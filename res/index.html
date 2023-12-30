@@ -37,6 +37,7 @@
             console.log(thisWindow.MainFrame?.nativeMessage() ?? "ohoho");
 
             const lastTimeEle = document.$("#lastTime");
+            const updateFrequencyEle = document.$("#updateFrequency");
 
             const playerIdEle = document.$("#playerId");
             const troopTypeEle = document.$('#troopType');
@@ -44,6 +45,7 @@
             const keepMoraleEle = document.$('#keepMorale');
             const keepRationEle = document.$('#keepRation');
             const troopsNumberEle = document.$('#troopsNumber');
+            const noInjuriesEle = document.$("#noInjuries")
 
             const btn = document.$("#start");
             btn.onclick = (ev) => {
@@ -57,6 +59,8 @@
                         return;
                     }
 
+                    const updateFrequency = parseInt(updateFrequencyEle.value ?? '1000');
+
                     timerId = setInterval(() => {
                         // console.log("running...: ", new Date());
                         lastTimeEle.innerText = new Date();
@@ -66,11 +70,12 @@
                         const keepMorale = keepMoraleEle.value ?? false;
                         const keepRation = keepRationEle.value ?? false;
                         const troopsNumber = troopsNumberEle.value ?? 0;
+                        const noInjuries = noInjuriesEle.value ?? false;
                         
                         // console.log(troopType, typeof troopType, ladderNotAllowed, keepMorale, keepRation, troopsNumber);
 
                         // call backend functions
-                        const ret = thisWindow.MainFrame?.enhancePlayer(parseInt(troopType), ladderNotAllowed, keepRation, keepMorale, troopsNumber);
+                        const ret = thisWindow.MainFrame?.enhancePlayer(parseInt(troopType), ladderNotAllowed, keepRation, keepMorale, troopsNumber, noInjuries);
                         if (!ret) {
                             failedSum += 1;
                         }
@@ -91,7 +96,7 @@
                             return;
                         }
                         playerIdEle.innerText = playerId;
-                    }, 1000);
+                    }, updateFrequency);
                     btn.innerText = "停止！";
                 } else {
                     // stop
@@ -109,6 +114,19 @@
     </br>
     <div>
         <div id="playerId">请点击启动</div>
+    </div>
+    </br>
+    <div>
+        <span>选择更新频率：</span>
+        <span>
+            <select id="updateFrequency">
+                <option value="1000">每1秒</option>
+                <option value="700">每0.7秒</option>
+                <option value="500">每0.5秒</option>
+                <option value="300">每0.3秒</option>
+                <option value="100">每0.1秒</option>
+            </select>
+        </span>
     </div>
     </br>
     <div>
@@ -154,6 +172,11 @@
     <div>
         <span>锁定部队人数：</span>
         <input type="number" id="troopsNumber" name="troopsNumber" />
+    </div>
+
+    <div>
+        <span>抹除所有伤员：</span>
+        <input type="checkbox" id="noInjuries" name="noInjuries" />
     </div>
 
     <div>
